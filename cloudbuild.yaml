@@ -1,0 +1,29 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ["build", "-t", "gcr.io/mojaloop-prod/ml-api-adapter:$SHORT_SHA", "."]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ["push", "gcr.io/mojaloop-prod/ml-api-adapter:$SHORT_SHA"]
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - set
+      - image
+      - deployment
+      - dev-ml-api-adapter-service
+      - 'ml-api-adapter-service=gcr.io/mojaloop-prod/ml-api-adapter:$SHORT_SHA'
+      - --namespace
+      - mojaloop
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=europe-west2-a'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=performance'
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - set
+      - image
+      - deployment
+      - dev-ml-api-adapter-handler-notification
+      - 'ml-api-adapter-handler-notification=gcr.io/mojaloop-prod/ml-api-adapter:$SHORT_SHA'
+      - --namespace
+      - mojaloop
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=europe-west2-a'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=performance'
