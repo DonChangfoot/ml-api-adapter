@@ -26,7 +26,7 @@
  ******/
 'use strict'
 
-const Consumer = require('@mojaloop/central-services-stream').Kafka.Consumer
+const Consumer = require('../../../static-repo/central-services-stream-9.2.0').Kafka.Consumer
 const Logger = require('@mojaloop/central-services-logger')
 const EventSdk = require('@mojaloop/event-sdk')
 const Participant = require('../../domain/participant')

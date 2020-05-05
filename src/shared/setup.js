@@ -34,7 +34,7 @@ const Config = require('../lib/config')
 const Endpoints = require('@mojaloop/central-services-shared').Util.Endpoints
 const Metrics = require('@mojaloop/central-services-metrics')
 const Enums = require('@mojaloop/central-services-shared').Enum
-const Kafka = require('@mojaloop/central-services-stream').Util
+const Kafka = require('../../static-repo/central-services-stream-9.2.0').Util
 const KafkaUtil = require('@mojaloop/central-services-shared').Util.Kafka
 const generalEnum = require('@mojaloop/central-services-shared').Enum
 

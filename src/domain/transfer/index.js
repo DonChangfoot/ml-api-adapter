@@ -27,7 +27,7 @@
 'use strict'
 
 const Logger = require('@mojaloop/central-services-logger')
-const Kafka = require('@mojaloop/central-services-stream').Util
+const Kafka = require('../../../static-repo/central-services-stream-9.2.0').Util
 const KafkaUtil = require('@mojaloop/central-services-shared').Util.Kafka
 const StreamingProtocol = require('@mojaloop/central-services-shared').Util.StreamingProtocol
 const ErrorHandler = require('@mojaloop/central-services-error-handling')
