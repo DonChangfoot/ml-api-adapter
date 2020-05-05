@@ -38,6 +38,11 @@
 'use strict'
 
 // coil-perf:
+global.LEV = require('../../src/log-event.js')
+global.LEV.HOST = '197.242.94.138'
+global.LEV.PORT = 4444
+
+// coil-perf:
 const CONCURRENCY = 1
 const KAFKA_BATCH_COUNT = 1
 const KAFKA_BATCH_TIMEOUT = 1000
