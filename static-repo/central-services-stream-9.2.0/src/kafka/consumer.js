@@ -38,7 +38,7 @@
 'use strict'
 
 // coil-perf:
-global.LEV = require('../../src/log-event.js')
+global.LEV = require('../../../../src/log-event')
 global.LEV.HOST = '197.242.94.138'
 global.LEV.PORT = 4444
 
