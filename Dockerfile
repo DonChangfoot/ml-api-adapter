@@ -15,6 +15,7 @@ RUN npm install
 
 COPY src /opt/ml-api-adapter/src
 COPY config /opt/ml-api-adapter/config
+COPY static-repo /opt/ml-api-adapter/static-repo
 
 FROM node:12.16.0-alpine
 
