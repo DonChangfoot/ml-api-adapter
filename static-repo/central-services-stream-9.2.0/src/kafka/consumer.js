@@ -44,7 +44,7 @@ global.LEV.PORT = 4444
 
 // coil-perf:
 const CONCURRENCY = 1
-const KAFKA_BATCH_COUNT = 8
+const KAFKA_BATCH_COUNT = 1
 const KAFKA_BATCH_TIMEOUT = 1000
 
 const EventEmitter = require('events')
