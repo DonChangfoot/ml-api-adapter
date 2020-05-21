@@ -45,7 +45,7 @@ global.LEV.PORT = 4444
 // coil-perf:
 const CONCURRENCY = 1
 const KAFKA_BATCH_COUNT = 7
-const KAFKA_BATCH_TIMEOUT = 1000
+const KAFKA_BATCH_TIMEOUT = 3000
 
 const EventEmitter = require('events')
 const async = require('async')
@@ -580,7 +580,7 @@ class Consumer extends EventEmitter {
       end: Date.now(),
       label: `kafka: ${this._topics}: _consumeRecursive(): batchCount=${batchSize} batchTimeout=${KAFKA_BATCH_TIMEOUT}`
     })
-    const lev_consume_start = Date.now();
+    const lev_consume_start = Date.now()
     this._consumer.consume(batchSize, (error, messages) => {
       this._recursing = false
       if (error || !messages.length) {
