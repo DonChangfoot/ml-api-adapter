@@ -588,7 +588,11 @@ class Consumer extends EventEmitter {
           super.emit('error', error)
         }
         if (this._status.running) {
-          LEV(`kafka: ${this._topics}: _consumeRecursive(): EOF, waiting ${recursiveTimeout}ms until next poll...`)
+          LEV({
+            start: lev_consume_start,
+            end: Date.now(),
+            label: `kafka: ${this._topics}: _consumeRecursive(): EOF, waiting ${recursiveTimeout}ms until next poll...`
+          })
           return setTimeout(() => {
             return this._consumeRecursive(recursiveTimeout, batchSize, workDoneCb)
           }, recursiveTimeout)
