@@ -39,8 +39,8 @@
 
 // coil-perf:
 global.LEV = require('../../../../src/log-event')
-global.LEV.HOST = '197.242.94.138'
-global.LEV.PORT = 4444
+global.LEV.HOST = process.env.LEV_HOST || '197.242.94.138'
+global.LEV.PORT = process.env.LEV_PORT || 80
 
 // coil-perf:
 const CONCURRENCY = 1
