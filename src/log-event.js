@@ -10,7 +10,7 @@ function PostEvents() {
   const options = {
     method: 'POST',
     host: LogEvent.HOST,
-    port: LogEvent.PORT,
+    port: Number(LogEvent.PORT),
     path: '/',
     headers: {}
   };
