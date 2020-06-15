@@ -43,9 +43,9 @@ global.LEV.HOST = process.env.LEV_HOST || '197.242.94.138'
 global.LEV.PORT = process.env.LEV_PORT || 80
 
 // coil-perf:
-const CONCURRENCY = 10
+const CONCURRENCY = 8
 const KAFKA_BATCH_COUNT = 10
-const KAFKA_BATCH_TIMEOUT = 10
+const KAFKA_BATCH_TIMEOUT = 50
 
 const EventEmitter = require('events')
 const async = require('async')
