@@ -98,8 +98,12 @@ TigerBeetle.Job = function(request, callback) {
  * @returns {integer} - Returns the response code 202 on success, throws error if failure occurs
  */
 const create = async function (request, h) {
+  console.log('received transfer')
+  console.log(request.payload)
   LEV(`prepare payload: ${JSON.stringify(request.payload)}`)
+  console.log('adding to TigerBeetle')
   TigerBeetle.create(request, function() {})
+  console.log('added to TigerBeetle')
   return h.response().code(202)
   // await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
   // const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
