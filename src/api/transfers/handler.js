@@ -151,7 +151,7 @@ TigerBeetle.Job = function(request, callback) {
  */
 const create = async function (request, h) {
   TigerBeetle.create(request, function() {})
-  return h.response().code(203)
+  return h.response().code(202)
   // await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
   // const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
   // Logger.error(fspiopError)
