@@ -54,21 +54,21 @@ module.exports = [{
       failAction: 'error'
     },
     validate: {
-      headers: Joi.object({
-        accept: Joi.string().optional().regex(regexAccept),
-        'content-type': Joi.string().required().regex(regexContentType),
-        'content-length': Joi.number().max(5242880),
-        date: Joi.date().format('ddd, D MMM YYYY H:mm:ss [GMT]').required(),
-        'x-forwarded-for': Joi.string().optional(),
-        'fspiop-source': Joi.string().required(),
-        'fspiop-destination': Joi.string().optional(),
-        'fspiop-encryption': Joi.string().optional(),
-        'fspiop-signature': Joi.string().optional(),
-        'fspiop-uri': Joi.string().optional(),
-        'fspiop-http-method': Joi.string().optional(),
-        traceparent: Joi.string().optional(),
-        tracestate: Joi.string().optional()
-      }).unknown(false).options({ stripUnknown: true }),
+      // headers: Joi.object({
+      //   accept: Joi.string().optional().regex(regexAccept),
+      //   'content-type': Joi.string().required().regex(regexContentType),
+      //   'content-length': Joi.number().max(5242880),
+      //   date: Joi.date().format('ddd, D MMM YYYY H:mm:ss [GMT]').required(),
+      //   'x-forwarded-for': Joi.string().optional(),
+      //   'fspiop-source': Joi.string().required(),
+      //   'fspiop-destination': Joi.string().optional(),
+      //   'fspiop-encryption': Joi.string().optional(),
+      //   'fspiop-signature': Joi.string().optional(),
+      //   'fspiop-uri': Joi.string().optional(),
+      //   'fspiop-http-method': Joi.string().optional(),
+      //   traceparent: Joi.string().optional(),
+      //   tracestate: Joi.string().optional()
+      // }).unknown(false).options({ stripUnknown: true }),
       // payload: Joi.object({
       //   transferId: Joi.string().guid().required().description('Id of transfer').label('Transfer Id must be in a valid GUID format.'),
       //   payeeFsp: Joi.string().required().min(1).max(32).description('Financial Service Provider of Payee').label('A valid Payee FSP number must be supplied.'),
