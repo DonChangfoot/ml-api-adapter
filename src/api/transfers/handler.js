@@ -48,10 +48,53 @@ global.LEV.PORT = 4444
 
 setTimeout(
   function() {
-    LEV(`initialized LEV in ml-api-adapter`)
+    LEV('initialized LEV in ml-api-adapter')
   },
   1000
 )
+
+// Measure event loop blocks of 10ms or more:
+(function() {
+  const delay = 5
+  let time = Date.now()
+  setInterval(
+    function() {
+      const start = time + delay
+      const end = Date.now()
+      const delta = end - start
+      if (delta > 10) {
+        LEV({
+          start: start,
+          end: end,
+          label: 'ml-api-adapter: event loop blocked'
+        })
+      }
+      time = end
+    },
+    delay
+  )
+})()
+
+// Monkey-patch Node's DNS module to intercept all DNS lookups:
+(function() {
+  const dns = require('dns')
+  const lookup = dns.lookup
+  dns.lookup = function(...request) {
+    const start = Date.now()
+    const callback = request[request.length - 1]
+    request[request.length - 1] = function(...response) {
+      const end = Date.now()
+      const args = JSON.stringify(request.slice(0, -1)).slice(1, -1)
+      callback(...response)
+      LEV({
+        start: start,
+        end: end,
+        label: `ml-api-adapter: dns.lookup(${args})`
+      })
+    }
+    lookup(...request)
+  }
+})()
 
 const TigerBeetle = {}
 
@@ -71,8 +114,8 @@ TigerBeetle.accept = function(request, callback) {
 TigerBeetle.push = function(batch, request, callback) {
   const self = this
   batch.jobs.push(new TigerBeetle.Job(request, callback))
-  if (batch.timestamp === 0) batch.timestamp = Date.now()
   if (batch.timeout === 0) {
+    batch.timestamp = Date.now()
     batch.timeout = setTimeout(
       function() {
         self.execute(batch)
