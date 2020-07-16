@@ -39,6 +39,53 @@ const LOG_ENABLED = false
  * @module src/api/transfers/handler
  */
 
+// coil-perf:
+global.LEV = require('../../../src/log-event')
+global.LEV.HOST = process.env.LEV_HOST || '197.242.94.138'
+global.LEV.PORT = process.env.LEV_PORT || 80
+
+const TigerBeetle = {}
+
+TigerBeetle.CREATE_TRANSFERS = { jobs: [], timestamp: 0, timeout: 0 }
+TigerBeetle.ACCEPT_TRANSFERS = { jobs: [], timestamp: 0, timeout: 0 }
+
+TigerBeetle.create = function(request, callback) {
+  const self = this
+  self.push(self.CREATE_TRANSFERS, request, callback)
+}
+
+TigerBeetle.accept = function(request, callback) {
+  const self = this
+  self.push(self.ACCEPT_TRANSFERS, request, callback)
+}
+
+TigerBeetle.push = function(batch, request, callback) {
+  const self = this
+  batch.jobs.push(new TigerBeetle.Job(request, callback))
+  if (batch.timestamp === 0) batch.timestamp = Date.now()
+  if (batch.timeout === 0) {
+    batch.timeout = setTimeout(
+      function() {
+        self.execute(batch)
+      },
+      100
+    )
+  }
+}
+
+TigerBeetle.execute = function(batch) {
+  const ms = Date.now() - batch.timestamp
+  LEV(`batched ${batch.jobs.length} jobs in ${ms}ms`)
+  batch.jobs = []
+  batch.timestamp = 0
+  batch.timeout = 0
+}
+
+TigerBeetle.Job = function(request, callback) {
+  this.request = request
+  this.callback = callback
+}
+
 /**
  * @function Create
  * @async
@@ -50,36 +97,13 @@ const LOG_ENABLED = false
  *
  * @returns {integer} - Returns the response code 202 on success, throws error if failure occurs
  */
-
 const create = async function (request, h) {
-  const histTimerEnd = Metrics.getHistogram(
-    'transfer_prepare',
-    'Produce a transfer prepare message to transfer prepare kafka topic',
-    ['success']
-  ).startTimer()
-  Logger.error(`[cid=${request.payload.transferId}, fsp=${request.payload.payerFsp}, source=${request.payload.payerFsp}, dest=${request.payload.payeeFsp}] ~ ML-API::service::create - START`)
-  const span = request.span
-
-  span.setTracestateTags({ t_api_prepare: `${Date.now()}` })
-  try {
-    span.setTags(getTransferSpanTags(request, Enum.Events.Event.Type.TRANSFER, Enum.Events.Event.Action.PREPARE))
-    !!LOG_ENABLED && Logger.debug('create::payload(%s)', JSON.stringify(request.payload))
-    !!LOG_ENABLED && Logger.debug('create::headers(%s)', JSON.stringify(request.headers))
-    await span.audit({
-      headers: request.headers,
-      dataUri: request.dataUri,
-      payload: request.payload
-    }, EventSdk.AuditEventAction.start)
-
-    await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
-    histTimerEnd({ success: true })
-    return h.response().code(202)
-  } catch (err) {
-    const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
-    Logger.error(fspiopError)
-    histTimerEnd({ success: false })
-    throw fspiopError
-  }
+  TigerBeetle.create(request, function() {})
+  return h.response().code(202)
+  // await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
+  // const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
+  // Logger.error(fspiopError)
+  // throw fspiopError
 }
 
 /**
