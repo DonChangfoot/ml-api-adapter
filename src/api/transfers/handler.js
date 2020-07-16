@@ -74,12 +74,13 @@ setInterval(
 )
 
 // Figure out where the event loop blocked:
-const event_loop_blocked_at = require('../../../src/blocked-at');
-event_loop_blocked_at(
-  function(ms, stack) {
-    LEV(`Blocked for ${ms}ms, operation started here: ${stack.join('\n')}`)
-  }
-)
+// (be aware that this has a performance cost due to async-hooks)
+// const event_loop_blocked_at = require('../../../src/blocked-at');
+// event_loop_blocked_at(
+//   function(ms, stack) {
+//     LEV(`Blocked for ${ms}ms, operation started here: ${stack.join('\n')}`)
+//   }
+// )
 
 // Monkey-patch Node's DNS module to intercept all DNS lookups:
 const coil_perf_dns = require('dns')
