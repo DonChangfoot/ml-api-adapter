@@ -41,8 +41,17 @@ const LOG_ENABLED = false
 
 // coil-perf:
 global.LEV = require('../../../src/log-event')
-global.LEV.HOST = process.env.LEV_HOST || '197.242.94.138'
-global.LEV.PORT = process.env.LEV_PORT || 80
+// global.LEV.HOST = process.env.LEV_HOST || '197.242.94.138'
+// global.LEV.PORT = process.env.LEV_PORT || 80
+global.LEV.HOST = '197.242.94.138'
+global.LEV.PORT = 80
+
+setTimeout(
+  function() {
+    LEV(`testing LEV from ml-api-adapter`)
+  },
+  1000
+)
 
 const TigerBeetle = {}
 
