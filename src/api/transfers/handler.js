@@ -48,7 +48,7 @@ global.LEV.PORT = 4444
 
 setTimeout(
   function() {
-    LEV(`testing LEV from ml-api-adapter`)
+    LEV(`initialized LEV in ml-api-adapter`)
   },
   1000
 )
@@ -107,7 +107,6 @@ TigerBeetle.Job = function(request, callback) {
  * @returns {integer} - Returns the response code 202 on success, throws error if failure occurs
  */
 const create = async function (request, h) {
-  LEV(`prepare payload: ${JSON.stringify(request.payload)}`)
   TigerBeetle.create(request, function() {})
   return h.response().code(203)
   // await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
