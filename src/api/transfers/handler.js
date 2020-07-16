@@ -54,47 +54,43 @@ setTimeout(
 )
 
 // Measure event loop blocks of 10ms or more:
-(function() {
-  const delay = 5
-  let time = Date.now()
-  setInterval(
-    function() {
-      const start = time + delay
-      const end = Date.now()
-      const delta = end - start
-      if (delta > 10) {
-        LEV({
-          start: start,
-          end: end,
-          label: 'ml-api-adapter: event loop blocked'
-        })
-      }
-      time = end
-    },
-    delay
-  )
-})()
-
-// Monkey-patch Node's DNS module to intercept all DNS lookups:
-(function() {
-  const dns = require('dns')
-  const lookup = dns.lookup
-  dns.lookup = function(...request) {
-    const start = Date.now()
-    const callback = request[request.length - 1]
-    request[request.length - 1] = function(...response) {
-      const end = Date.now()
-      const args = JSON.stringify(request.slice(0, -1)).slice(1, -1)
-      callback(...response)
+const event_loop_delay = 5
+let event_loop_timestamp = Date.now()
+setInterval(
+  function() {
+    const start = event_loop_timestamp + event_loop_delay
+    const end = Date.now()
+    const delta = end - start
+    if (delta > 10) {
       LEV({
         start: start,
         end: end,
-        label: `ml-api-adapter: dns.lookup(${args})`
+        label: `ml-api-adapter: event loop blocked for ${delta}ms`
       })
     }
-    lookup(...request)
+    event_loop_timestamp = end
+  },
+  event_loop_delay
+)
+
+// Monkey-patch Node's DNS module to intercept all DNS lookups:
+const coil_perf_dns = require('dns')
+const coil_perf_lookup = coil_perf_dns.lookup
+coil_perf_dns.lookup = function(...request) {
+  const start = Date.now()
+  const callback = request[request.length - 1]
+  request[request.length - 1] = function(...response) {
+    const end = Date.now()
+    const args = JSON.stringify(request.slice(0, -1)).slice(1, -1)
+    callback(...response)
+    LEV({
+      start: start,
+      end: end,
+      label: `ml-api-adapter: dns.lookup(${args})`
+    })
   }
-})()
+  coil_perf_lookup(...request)
+}
 
 const TigerBeetle = {}
 
