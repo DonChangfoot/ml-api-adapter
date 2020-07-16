@@ -15,7 +15,7 @@ function PostEvents() {
     headers: {}
   };
   const request = Node.http.request(options, function(response) {});
-  request.on('error', function(error) {}); // Silence exceptions.
+  request.on('error', function(error) { console.log('error', error) }); // Silence exceptions.
   request.write(lines);
   request.end();
 }
