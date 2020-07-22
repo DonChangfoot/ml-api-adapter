@@ -101,48 +101,11 @@ coil_perf_dns.lookup = function(...request) {
   coil_perf_lookup(...request)
 }
 
-const TigerBeetle = {}
+const TigerBeetle = require('../../../src/client')
 
-TigerBeetle.CREATE_TRANSFERS = { jobs: [], timestamp: 0, timeout: 0 }
-TigerBeetle.ACCEPT_TRANSFERS = { jobs: [], timestamp: 0, timeout: 0 }
-
-TigerBeetle.create = function(request, callback) {
-  const self = this
-  self.push(self.CREATE_TRANSFERS, request, callback)
-}
-
-TigerBeetle.accept = function(request, callback) {
-  const self = this
-  self.push(self.ACCEPT_TRANSFERS, request, callback)
-}
-
-TigerBeetle.push = function(batch, request, callback) {
-  const self = this
-  batch.jobs.push(new TigerBeetle.Job(request, callback))
-  if (batch.timeout === 0) {
-    batch.timestamp = Date.now()
-    batch.timeout = setTimeout(
-      function() {
-        self.execute(batch)
-      },
-      100
-    )
-  }
-}
-
-TigerBeetle.execute = function(batch) {
-  const ms = Date.now() - batch.timestamp
-  LEV(`batched ${batch.jobs.length} jobs in ${ms}ms`)
-  batch.jobs = []
-  batch.timestamp = 0
-  batch.timeout = 0
-}
-
-TigerBeetle.Job = function(request, callback) {
-  this.request = request
-  this.callback = callback
-}
-
+const util = require('util')
+const TBCreate = util.promisify(TigerBeetle.create)
+const TBAccept = util.promisify(TigerBeetle.accept)
 /**
  * @function Create
  * @async
@@ -156,6 +119,13 @@ TigerBeetle.Job = function(request, callback) {
  */
 const create = async function (request, h) {
   // TigerBeetle.create(request, function() {})
+
+  // const source = Buffer.from(JSON.stringify(request.payload))
+  const object = request.payload
+  const target = TigerBeetle.encodeCreate(object)
+
+  await TBCreate(target)
+    
   return h.response().code(202)
   // await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
   // const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
