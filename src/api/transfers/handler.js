@@ -124,9 +124,16 @@ const PAYEE_PORT = 3333
 const PAYER_HOST = '34.105.130.202'
 const PAYER_PORT = 7777
 
-const Node = { http: require('http') }
+const Node = { http: require('http'), process: process }
+
+Node.process.on('uncaughtException',
+  function(error) {
+    LEV(`ml-api-adapter: UNCAUGHT EXCEPTION: ${error}`);
+  }
+);
 
 function PostNotification(host, port, path, body, end) {
+  LEV(`ml-api-adapter: notification path=${path}`);
   const headers = {
     'Content-Length': body.length
   }
