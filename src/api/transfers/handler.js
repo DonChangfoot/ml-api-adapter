@@ -180,15 +180,47 @@ const ConnectionPool = new Node.http.Agent({
  * @returns {integer} - Returns the response code 202 on success, throws error if failure occurs
  */
 const create = async function (request, h) {
-  const source = Buffer.from(JSON.stringify(request.payload))
-  const object = request.payload
-  const target = TigerBeetle.encodeCreate(object)
-  await TBCreate(target)
-  PostNotification(PAYEE_HOST, PAYEE_PORT, request.path, source,
-    function() {
-    }
-  )
-  return h.response().code(202)
+  let tb = false
+  if (tb) {
+    const source = Buffer.from(JSON.stringify(request.payload))
+    const object = request.payload
+    const target = TigerBeetle.encodeCreate(object)
+    await TBCreate(target)
+    PostNotification(PAYEE_HOST, PAYEE_PORT, request.path, source,
+      function() {
+      }
+    )
+    return h.response().code(202)
+  }
+
+  const histTimerEnd = Metrics.getHistogram(
+    'transfer_prepare',
+    'Produce a transfer prepare message to transfer prepare kafka topic',
+    ['success']
+  ).startTimer()
+  Logger.error(`[cid=${request.payload.transferId}, fsp=${request.payload.payerFsp}, source=${request.payload.payerFsp}, dest=${request.payload.payeeFsp}] ~ ML-API::service::create - START`)
+  const span = request.span
+
+  span.setTracestateTags({ t_api_prepare: `${Date.now()}` })
+  try {
+    span.setTags(getTransferSpanTags(request, Enum.Events.Event.Type.TRANSFER, Enum.Events.Event.Action.PREPARE))
+    !!LOG_ENABLED && Logger.debug('create::payload(%s)', JSON.stringify(request.payload))
+    !!LOG_ENABLED && Logger.debug('create::headers(%s)', JSON.stringify(request.headers))
+    await span.audit({
+      headers: request.headers,
+      dataUri: request.dataUri,
+      payload: request.payload
+    }, EventSdk.AuditEventAction.start)
+
+    await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
+    histTimerEnd({ success: true })
+    return h.response().code(202)
+  } catch (err) {
+    const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
+    Logger.error(fspiopError)
+    histTimerEnd({ success: false })
+    throw fspiopError
+  }
 }
 
 /**
@@ -204,16 +236,49 @@ const create = async function (request, h) {
  */
 
 const fulfilTransfer = async function (request, h) {
-  const id = request.path.split('/').pop()
-  const source = Buffer.from(JSON.stringify(request.payload))
-  const object = request.payload
-  const target = TigerBeetle.encodeAccept(id, object)
-  await TBAccept(target)
-  PostNotification(PAYER_HOST, PAYER_PORT, request.path, source,
-    function() {
-    }
-  )
-  return h.response().code(202)
+  let tb = false
+  if (tb) {
+    const id = request.path.split('/').pop()
+    const source = Buffer.from(JSON.stringify(request.payload))
+    const object = request.payload
+    const target = TigerBeetle.encodeAccept(id, object)
+    await TBAccept(target)
+    PostNotification(PAYER_HOST, PAYER_PORT, request.path, source,
+      function() {
+      }
+    )
+    return h.response().code(202)
+  }
+
+  const histTimerEnd = Metrics.getHistogram(
+    'transfer_fulfil',
+    'Produce a transfer fulfil message to transfer fulfil kafka topic',
+    ['success']
+  ).startTimer()
+  Logger.error(`[cid=${request.params.id}, fsp=${request.headers['fspiop-source']}, source=${request.headers['fspiop-source']}, dest=${request.headers['fspiop-destination']}] ~ ML-API::service::fulfilTransfer - START`)
+  const span = request.span
+  span.setTracestateTags({ t_api_fulfil: `${Date.now()}` })
+  try {
+    span.setTags(getTransferSpanTags(request, Enum.Events.Event.Type.TRANSFER, Enum.Events.Event.Action.FULFIL))
+    Validator.fulfilTransfer(request)
+    !!LOG_ENABLED && Logger.debug('fulfilTransfer::payload(%s)', JSON.stringify(request.payload))
+    !!LOG_ENABLED && Logger.debug('fulfilTransfer::headers(%s)', JSON.stringify(request.headers))
+    Logger.debug('fulfilTransfer::id(%s)', request.params.id)
+    await span.audit({
+      headers: request.headers,
+      dataUri: request.dataUri,
+      payload: request.payload,
+      params: request.params
+    }, EventSdk.AuditEventAction.start)
+    await TransferService.fulfil(request.headers, request.dataUri, request.payload, request.params, span)
+    histTimerEnd({ success: true })
+    return h.response().code(200)
+  } catch (err) {
+    const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
+    Logger.error(fspiopError)
+    histTimerEnd({ success: false })
+    throw fspiopError
+  }
 }
 
 /**
