@@ -85,6 +85,7 @@
     "@mojaloop/event-sdk": "9.4.0",
     "@mojaloop/forensic-logging-client": "8.3.0",
     "@now-ims/hapi-now-auth": "2.0.1",
+    "@ronomon/crypto-async": "^5.0.1",
     "axios": "0.19.2",
     "blipp": "4.0.1",
     "commander": "4.1.1",
