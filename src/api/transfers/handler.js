@@ -106,6 +106,53 @@ const TigerBeetle = require('../../../src/client')
 const util = require('util')
 const TBCreate = util.promisify(TigerBeetle.create)
 const TBAccept = util.promisify(TigerBeetle.accept)
+
+// Test harness payee:
+const PAYEE_HOST = '10.126.10.139'
+const PAYEE_PORT = 3333
+
+// Test harness payer:
+const PAYER_HOST = '10.126.10.139'
+const PAYER_PORT = 7777
+
+const Node = { http: require('http') }
+
+function PostNotification(host, port, path, body, end) {
+  const headers = {
+    'Content-Length': body.length
+  }
+  const options = {
+    agent: ConnectionPool,
+    method: 'POST',
+    host: host,
+    port: port,
+    path: path,
+    headers: headers
+  }
+  const request = Node.http.request(options,
+    function(response) {
+      const buffers = []
+      response.on('data', function(buffer) { buffers.push(buffer) })
+      response.on('end',
+        function() {
+          end()
+        }
+      )
+    }
+  )
+  request.write(body)
+  request.end()
+}
+
+// Create a keep-alive HTTP request connection pool:
+// We don't want each and every notification to do a TCP handshake...
+// This is critical. The lack of this causes multi-second event loop blocks.
+const ConnectionPool = new Node.http.Agent({
+  keepAlive: true,
+  maxFreeSockets: 10000,
+  timeout: 60 * 1000
+})
+
 /**
  * @function Create
  * @async
@@ -118,19 +165,15 @@ const TBAccept = util.promisify(TigerBeetle.accept)
  * @returns {integer} - Returns the response code 202 on success, throws error if failure occurs
  */
 const create = async function (request, h) {
-  // TigerBeetle.create(request, function() {})
-
-  // const source = Buffer.from(JSON.stringify(request.payload))
+  const source = Buffer.from(JSON.stringify(request.payload))
   const object = request.payload
   const target = TigerBeetle.encodeCreate(object)
-
   await TBCreate(target)
-    
+  PostNotification(PAYEE_HOST, PAYEE_PORT, request.url.path, source,
+    function() {
+    }
+  )
   return h.response().code(202)
-  // await TransferService.prepare(request.headers, request.dataUri, request.payload, span)
-  // const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
-  // Logger.error(fspiopError)
-  // throw fspiopError
 }
 
 /**
@@ -146,35 +189,15 @@ const create = async function (request, h) {
  */
 
 const fulfilTransfer = async function (request, h) {
-  const histTimerEnd = Metrics.getHistogram(
-    'transfer_fulfil',
-    'Produce a transfer fulfil message to transfer fulfil kafka topic',
-    ['success']
-  ).startTimer()
-  Logger.error(`[cid=${request.params.id}, fsp=${request.headers['fspiop-source']}, source=${request.headers['fspiop-source']}, dest=${request.headers['fspiop-destination']}] ~ ML-API::service::fulfilTransfer - START`)
-  const span = request.span
-  span.setTracestateTags({ t_api_fulfil: `${Date.now()}` })
-  try {
-    span.setTags(getTransferSpanTags(request, Enum.Events.Event.Type.TRANSFER, Enum.Events.Event.Action.FULFIL))
-    Validator.fulfilTransfer(request)
-    !!LOG_ENABLED && Logger.debug('fulfilTransfer::payload(%s)', JSON.stringify(request.payload))
-    !!LOG_ENABLED && Logger.debug('fulfilTransfer::headers(%s)', JSON.stringify(request.headers))
-    Logger.debug('fulfilTransfer::id(%s)', request.params.id)
-    await span.audit({
-      headers: request.headers,
-      dataUri: request.dataUri,
-      payload: request.payload,
-      params: request.params
-    }, EventSdk.AuditEventAction.start)
-    await TransferService.fulfil(request.headers, request.dataUri, request.payload, request.params, span)
-    histTimerEnd({ success: true })
-    return h.response().code(200)
-  } catch (err) {
-    const fspiopError = ErrorHandler.Factory.reformatFSPIOPError(err)
-    Logger.error(fspiopError)
-    histTimerEnd({ success: false })
-    throw fspiopError
-  }
+  const source = Buffer.from(JSON.stringify(request.payload))
+  const object = request.payload
+  const target = TigerBeetle.encodeAccept(object)
+  await TBAccept(target)
+  PostNotification(PAYER_HOST, PAYER_PORT, request.url.path, source,
+    function() {
+    }
+  )
+  return h.response().code(202)
 }
 
 /**
