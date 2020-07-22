@@ -185,7 +185,7 @@ const create = async function (request, h) {
   const object = request.payload
   const target = TigerBeetle.encodeCreate(object)
   await TBCreate(target)
-  PostNotification(PAYEE_HOST, PAYEE_PORT, request.url.path, source,
+  PostNotification(PAYEE_HOST, PAYEE_PORT, request.url, source,
     function() {
     }
   )
@@ -209,7 +209,7 @@ const fulfilTransfer = async function (request, h) {
   const object = request.payload
   const target = TigerBeetle.encodeAccept(object)
   await TBAccept(target)
-  PostNotification(PAYER_HOST, PAYER_PORT, request.url.path, source,
+  PostNotification(PAYER_HOST, PAYER_PORT, request.url, source,
     function() {
     }
   )
