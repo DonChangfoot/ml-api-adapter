@@ -185,7 +185,6 @@ const create = async function (request, h) {
   const object = request.payload
   const target = TigerBeetle.encodeCreate(object)
   await TBCreate(target)
-  // const path = '/' + request.url.split('/').slice(3).join('/')
   PostNotification(PAYEE_HOST, PAYEE_PORT, request.path, source,
     function() {
     }
@@ -206,11 +205,11 @@ const create = async function (request, h) {
  */
 
 const fulfilTransfer = async function (request, h) {
+  const id = request.path.split('/').pop()
   const source = Buffer.from(JSON.stringify(request.payload))
   const object = request.payload
-  const target = TigerBeetle.encodeAccept(object)
+  const target = TigerBeetle.encodeAccept(id, object)
   await TBAccept(target)
-  // const path = '/' + String(request.url).split('/').slice(3).join('/')
   PostNotification(PAYER_HOST, PAYER_PORT, request.path, source,
     function() {
     }
