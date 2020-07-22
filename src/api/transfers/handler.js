@@ -107,6 +107,7 @@ const util = require('util')
 const TBCreate = util.promisify(TigerBeetle.create)
 const TBAccept = util.promisify(TigerBeetle.accept)
 
+const TIGER_BEETLE_ENABLED = false
 const TIGER_BEETLE_HOST = 'tb.perf.openafrica.network'
 const TIGER_BEETLE_PORT = 30000
 
@@ -180,8 +181,7 @@ const ConnectionPool = new Node.http.Agent({
  * @returns {integer} - Returns the response code 202 on success, throws error if failure occurs
  */
 const create = async function (request, h) {
-  let tb = false
-  if (tb) {
+  if (TIGER_BEETLE_ENABLED) {
     const source = Buffer.from(JSON.stringify(request.payload))
     const object = request.payload
     const target = TigerBeetle.encodeCreate(object)
@@ -236,8 +236,7 @@ const create = async function (request, h) {
  */
 
 const fulfilTransfer = async function (request, h) {
-  let tb = false
-  if (tb) {
+  if (TIGER_BEETLE_ENABLED) {
     const id = request.path.split('/').pop()
     const source = Buffer.from(JSON.stringify(request.payload))
     const object = request.payload
