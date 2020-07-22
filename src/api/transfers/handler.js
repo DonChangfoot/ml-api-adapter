@@ -206,6 +206,7 @@ const create = async function (request, h) {
 
 const fulfilTransfer = async function (request, h) {
   const id = request.path.split('/').pop()
+  LEV(`request.path=${request.path} id=${id}`)
   const source = Buffer.from(JSON.stringify(request.payload))
   const object = request.payload
   const target = TigerBeetle.encodeAccept(id, object)
