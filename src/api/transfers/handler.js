@@ -117,11 +117,11 @@ TigerBeetle.connect(TIGER_BEETLE_HOST, TIGER_BEETLE_PORT,
 )
 
 // Test harness payee:
-const PAYEE_HOST = '10.126.10.139'
+const PAYEE_HOST = 'load.perf.openafrica.network'
 const PAYEE_PORT = 3333
 
 // Test harness payer:
-const PAYER_HOST = '10.126.10.139'
+const PAYER_HOST = 'load.perf.openafrica.network'
 const PAYER_PORT = 7777
 
 const Node = { http: require('http') }
