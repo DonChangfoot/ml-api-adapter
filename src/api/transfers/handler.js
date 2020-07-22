@@ -104,8 +104,8 @@ coil_perf_dns.lookup = function(...request) {
 const TigerBeetle = require('../../../src/client')
 
 const util = require('util')
-const TBCreate = util.promisify(TigerBeetle.create)
-const TBAccept = util.promisify(TigerBeetle.accept)
+const TBCreate = util.promisify(TigerBeetle.create.bind(TigerBeetle))
+const TBAccept = util.promisify(TigerBeetle.accept.bind(TigerBeetle))
 
 const TIGER_BEETLE_HOST = 'tb.perf.openafrica.network'
 const TIGER_BEETLE_PORT = 30000
