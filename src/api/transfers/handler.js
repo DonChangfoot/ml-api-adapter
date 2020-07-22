@@ -107,6 +107,15 @@ const util = require('util')
 const TBCreate = util.promisify(TigerBeetle.create)
 const TBAccept = util.promisify(TigerBeetle.accept)
 
+const TIGER_BEETLE_HOST = 'tb.perf.openafrica.network'
+const TIGER_BEETLE_PORT = 30000
+
+TigerBeetle.connect(TIGER_BEETLE_HOST, TIGER_BEETLE_PORT,
+  function(error) {
+    if (error) throw error
+  }
+)
+
 // Test harness payee:
 const PAYEE_HOST = '10.126.10.139'
 const PAYEE_PORT = 3333
