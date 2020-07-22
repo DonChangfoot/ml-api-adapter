@@ -95,14 +95,14 @@ TigerBeetle.ACCEPT_TRANSFERS = {
 // Add an incoming prepare `buffer` to a batch of prepares.
 // `callback` will be called once persisted to TigerBeetle.
 TigerBeetle.create = function(buffer, callback) {
-  const self = this;
+  const self = TigerBeetle;
   self.push(self.CREATE_TRANSFERS, buffer, callback);
 };
 
 // Add an incoming fulfill `buffer` to a batch of fulfills.
 // `callback` will be called once persisted to TigerBeetle.
 TigerBeetle.accept = function(buffer, callback) {
-  const self = this;
+  const self = TigerBeetle;
   self.push(self.ACCEPT_TRANSFERS, buffer, callback);
 };
 
